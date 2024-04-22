@@ -1,46 +1,47 @@
-use clap::{App, AppSettings, Arg, SubCommand};
+use clap::Arg;
+use clap::Command;
 use std::process::exit;
 
 fn main() {
-    let matches = App::new(env!("CARGO_PKG_NAME"))
+    let matches = Command::new(env!("CARGO_PKG_NAME"))
         .version(env!("CARGO_PKG_VERSION"))
         .author(env!("CARGO_PKG_AUTHORS"))
         .about(env!("CARGO_PKG_DESCRIPTION"))
-        .setting(AppSettings::DisableHelpSubcommand)
-        .setting(AppSettings::SubcommandRequiredElseHelp)
-        .setting(AppSettings::VersionlessSubcommands)
+        .disable_help_subcommand(true)
+        .subcommand_required(true)
+        .arg_required_else_help(true)
         .subcommand(
-            SubCommand::with_name("set")
+            Command::new("set")
                 .about("Set the value of a string key to a string")
-                .arg(Arg::with_name("KEY").help("A string key").required(true))
+                .arg(Arg::new("KEY").help("A string key").required(true))
                 .arg(
-                    Arg::with_name("VALUE")
+                    Arg::new("VALUE")
                         .help("The string value of the key")
                         .required(true),
                 ),
         )
         .subcommand(
-            SubCommand::with_name("get")
+            Command::new("get")
                 .about("Get the string value of a given string key")
-                .arg(Arg::with_name("KEY").help("A string key").required(true)),
+                .arg(Arg::new("KEY").help("A string key").required(true)),
         )
         .subcommand(
-            SubCommand::with_name("rm")
+            Command::new("rm")
                 .about("Remove a given key")
-                .arg(Arg::with_name("KEY").help("A string key").required(true)),
+                .arg(Arg::new("KEY").help("A string key").required(true)),
         )
         .get_matches();
 
     match matches.subcommand() {
-        ("set", Some(_matches)) => {
+        Some(("set", _matches)) => {
             eprintln!("unimplemented");
             exit(1);
         }
-        ("get", Some(_matches)) => {
+        Some(("get", _matches)) => {
             eprintln!("unimplemented");
             exit(1);
         }
-        ("rm", Some(_matches)) => {
+        Some(("rm", _matches)) => {
             eprintln!("unimplemented");
             exit(1);
         }
