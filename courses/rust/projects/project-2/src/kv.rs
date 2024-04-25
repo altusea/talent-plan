@@ -212,21 +212,15 @@ fn new_log_file(
     gen: u64,
     readers: &mut HashMap<u64, BufReaderWithPos<File>>,
 ) -> Result<BufWriterWithPos<File>> {
-    let path = log_path(&path, gen);
-    let writer = BufWriterWithPos::new(
-        OpenOptions::new()
-            .create(true)
-            .write(true)
-            .append(true)
-            .open(&path)?,
-    )?;
+    let path = log_path(path, gen);
+    let writer = BufWriterWithPos::new(OpenOptions::new().create(true).append(true).open(&path)?)?;
     readers.insert(gen, BufReaderWithPos::new(File::open(&path)?)?);
     Ok(writer)
 }
 
 /// Returns sorted generation numbers in the given directory.
 fn sorted_gen_list(path: &Path) -> Result<Vec<u64>> {
-    let mut gen_list: Vec<u64> = fs::read_dir(&path)?
+    let mut gen_list: Vec<u64> = fs::read_dir(path)?
         .flat_map(|res| -> Result<_> { Ok(res?.path()) })
         .filter(|path| path.is_file() && path.extension() == Some("log".as_ref()))
         .flat_map(|path| {
@@ -320,7 +314,7 @@ struct BufReaderWithPos<R: Read + Seek> {
 
 impl<R: Read + Seek> BufReaderWithPos<R> {
     fn new(mut inner: R) -> Result<Self> {
-        let pos = inner.seek(SeekFrom::Current(0))?;
+        let pos = inner.stream_position()?;
         Ok(BufReaderWithPos {
             reader: BufReader::new(inner),
             pos,
@@ -350,7 +344,7 @@ struct BufWriterWithPos<W: Write + Seek> {
 
 impl<W: Write + Seek> BufWriterWithPos<W> {
     fn new(mut inner: W) -> Result<Self> {
-        let pos = inner.seek(SeekFrom::Current(0))?;
+        let pos = inner.stream_position()?;
         Ok(BufWriterWithPos {
             writer: BufWriter::new(inner),
             pos,
